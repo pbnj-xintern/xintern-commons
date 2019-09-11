@@ -12,7 +12,6 @@ const Review = mongoose.Schema({
     flagged: { type: mongoose.Schema.Types.Boolean },
     upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     downvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    sadReacts: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
 
 });
 
