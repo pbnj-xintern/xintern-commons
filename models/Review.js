@@ -9,7 +9,7 @@ const Review = mongoose.Schema({
     position: { type: String, required: true },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     company: { type: mongoose.Schema.Types.ObjectId, ref: "Company" },
-    flagged: { type: mongoose.Schema.Types.Boolean },
+    flagged: { type: mongoose.Schema.Types.Boolean, default: false },
     upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     downvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
