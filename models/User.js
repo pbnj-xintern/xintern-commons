@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const User = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     createdAt: { type: mongoose.Schema.Types.Date, default: new Date(), required: true },
-    deletedAt: { type: mongoose.Schema.Types.Date, default: null },
+    isDeleted: { type: mongoose.Schema.Types.Boolean, default: false },
     username: { type: mongoose.Schema.Types.String, required: true },
     password: { type: mongoose.Schema.Types.String, required: true },
     email: { type: mongoose.Schema.Types.String, required: true },

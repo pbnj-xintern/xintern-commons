@@ -4,7 +4,6 @@ const Review = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
 
     createdAt: { type: mongoose.Schema.Types.Date, default: new Date(), required: true },
-    deletedAt: { type: mongoose.Schema.Types.Date, default: null },
 
     salary: { type: mongoose.Schema.Types.Number, required: true },
     content: { type: mongoose.Schema.Types.String, required: true },
