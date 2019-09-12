@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Review = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     salary: { type: Number, required: true },
-    createdAt: { type: mongoose.Schema.Types.Date, required: true },
+    createdAt: { type: mongoose.Schema.Types.Date, default: new Date(), required: true },
     deletedAt: { type: mongoose.Schema.Types.Date, default: null },
     content: { type: String, required: true },
     position: { type: String, required: true },
