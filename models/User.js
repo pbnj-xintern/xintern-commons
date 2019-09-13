@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const User = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     createdAt: { type: mongoose.Schema.Types.Date, default: new Date(), required: true },
-    deletedAt: { type: mongoose.Schema.Types.Date, default: null },
+    isDeleted: { type: Boolean, default: false },
     username: { type: String },
     name: { type: String },
     sex: { type: String },

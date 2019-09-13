@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const ProfileLinks = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    isDeleted: { type: Boolean, default: false },
     linkedin: {},
     //other social medias/links
 });
