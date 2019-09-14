@@ -1,9 +1,16 @@
 const mongoose = require('mongoose');
 
-const dbExecute = (db, fn) => db.then(fn).finally(() => db.close());
+mongoose.Promise = Promise;
 
 function dbExec(dbUrl, fn) {
-    return dbExecute(mongoose.connect(dbUrl, { useNewUrlParser: true }), fn);
+    var mongoosePromise = new Promise((resolve, reject) => {
+        mongoose.connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true })
+            .then(fn)
+            .catch(reject)
+            .finally(resolve)
+    })
+
+    mongoosePromise.then(() => mongoose.disconnect().then(() => console.log('Mongoose connections disconnected.')))
 }
 
 module.exports = dbExec;
