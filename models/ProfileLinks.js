@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
-//may not be used
 const ProfileLinks = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    linkedin: {},
-    //other social medias/links
+    linkedin: { type: mongoose.Schema.Types.String },
+    facebook: { type: mongoose.Schema.Types.String },
+    twitter: { type: mongoose.Schema.Types.String },
+    isDeleted: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model('ProfileLinks', ProfileLinks);
