@@ -1,9 +1,9 @@
 module.exports.createErrorResponse = (code, message) => {
-    console.error('sendErrorRepsonse: console logging error msg:\n', errorMessage)
+    console.error('sendErrorRepsonse: console logging error msg:\n', message)
     return { 
         statusCode: statusCode, 
         headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-        body: JSON.stringify({ error: errorMessage })
+        body: JSON.stringify({ error: message })
     }
 }
 
