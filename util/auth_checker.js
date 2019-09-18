@@ -2,8 +2,7 @@ const jwt = require('jsonwebtoken');
 
 module.exports.checkAuth = (token, secret) => {
     try{
-        const decoded = jwt.verify(token, secret);
-        return decoded;
+        return jwt.verify(token, secret);
     }catch(error){
         return false;
     }
