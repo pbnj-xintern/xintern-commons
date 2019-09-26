@@ -17,16 +17,17 @@ module.exports.uploadMultipartToS3 = async (fileName, base64Body, path) => {
         ContentEncoding: 'base64',
     };
 
-    let key = await s3.putObject(params, function (err, data) {
-        if (err) {
-            console.log(err);
-            return null
-        }
-        console.log('succesfully uploaded the image!');
-    });
+    let putObjPromise = new Promise((resolve, reject) => {
+        s3.putObject(params, function (err, data) {
+            if (err)
+                return reject()
+            console.log('succesfully uploaded the image!');
+            resolve()
+        });
+    })
 
-    let url = 'https://' + process.env.BUCKET_NAME + '.s3.amazonaws.com/' + path + fileName
-
-    return url;
-
+    return putObjPromise
+        .then(() => 'https://' + process.env.BUCKET_NAME + '.s3.amazonaws.com/' + path + fileName)
+        .catch(() => null)
 }
+
