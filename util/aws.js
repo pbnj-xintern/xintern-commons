@@ -20,7 +20,7 @@ module.exports.uploadMultipartToS3 = async (fileName, base64Body, path) => {
     let putObjPromise = new Promise((resolve, reject) => {
         s3.putObject(params, function (err, data) {
             if (err)
-                return reject()
+                return reject(err)
             console.log('succesfully uploaded the image!');
             resolve()
         });
@@ -28,6 +28,9 @@ module.exports.uploadMultipartToS3 = async (fileName, base64Body, path) => {
 
     return putObjPromise
         .then(() => 'https://' + process.env.BUCKET_NAME + '.s3.amazonaws.com/' + path + fileName)
-        .catch(() => null)
+        .catch(err => {
+	    err.message? console.error(err.message) : console.error(err);
+	    return null
+	})
 }
 
