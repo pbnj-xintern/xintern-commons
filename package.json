@@ -16,7 +16,8 @@
   },
   "homepage": "https://github.com/pbnj-xintern/xintern-commons#readme",
   "dependencies": {
-    "aws-sdk": "^2.531.0",
-    "mongoose": "^5.7.0"
+    "aws-sdk": "^2.554.0",
+    "axios": "^0.19.0",
+    "mongoose": "^5.7.6"
   }
 }
