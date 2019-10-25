@@ -6,7 +6,12 @@ const Review = require('../models/Review')
 const Comment = require('../models/Comment')
 const Company = require('../models/Company')
 const Rating = require('../models/Rating')
+const { LogoScrape } = require('logo-scrape');
 const MONGO_URL = process.env.MONGO_URL
+const readline = require('readline').createInterface({
+    input: process.stdin,
+    output: process.stdout
+})
 
 
 const getInternCompassUserId = async () => {
@@ -26,14 +31,6 @@ const getInternCompassUserId = async () => {
 
     return internCompassUserId
 }
-
-const asyncForEach = async (array, callback) => {
-    for (let index = 0; index < array.length; index++) {
-        await callback(array[index], index, array);
-    }
-    return 0
-}
-
 
 const seed = async () => {
 
@@ -75,12 +72,18 @@ const seed = async () => {
 
     let ratingJsonToMongoMap = {}
     let companyJsonToMongoMap = {}
+    let colorIndex = 0;
+    let colors = ['FAA', 'FFC', 'CFF', 'CCF', 'FCC', 'CFC', '9CC', 'FFC', '999']
+    let blacklist = ['http://www.amd.com']
 
 
-    rawUserReviewJson.forEach(ur => {
+    for (var ur of rawUserReviewJson) {
 
         let company = companiesJsonMap[ur.company_id]
         let job = jobsJsonMap[ur.job_id]
+        let color = colors[colorIndex]
+        colorIndex = colorIndex >= 9 ? 0 : colorIndex + 1
+        let placeholder = 'https://dummyimage.com/300x300/' + color + '/fff.png&text=' + company.name.substring(0, 1)
 
         if (company !== undefined && job !== undefined) {
 
@@ -90,27 +93,62 @@ const seed = async () => {
                 mentorship: ur.mentorship_rating,
                 impact: ur.meaningful_work_rating,
                 interview: null,
+                createdAt: ur.created_at
             })
 
             ratingJsonToMongoMap[ur.id] = ratingMongoose
+
+            let logoURL = company.logo_url
+
+            if (logoURL) {
+                let status = await axios.get(logoURL)
+                    .then(response => response.status)
+                    .catch(() => {
+                        return 404
+                    })
+
+                console.log('\n' + status)
+                console.log(company.website_url)
+
+                if (status === 404 && company.website_url && !(blacklist.includes(company.website_url))) {
+                    let logoObjs = await LogoScrape.getLogos(company.website_url).catch(e => null)
+                    if (logoObjs) {
+                        let obj = logoObjs.filter(logoObj => !logoObj.data).filter(logoObj => logoObj.type.toLowerCase().includes('image'))[0]
+                        console.log(obj)
+                        logoURL = obj ? obj.url : placeholder
+                    }
+                    else
+                        logoURL = placeholder
+                    console.log('new logourl', logoURL)
+                }
+            }
+            else {
+                logoURL = placeholder
+            }
 
             let companyMongoose = new Company({
                 _id: new mongoose.Types.ObjectId(),
                 name: company.name,
                 location: job.location,
-                logo: company.logo_url || 'none',
+                logo: logoURL,
             })
 
             companyJsonToMongoMap[company.name + job.location] = companyMongoose
         }
 
-    })
+    }
 
     ratingObjBulk = Object.keys(ratingJsonToMongoMap).map(id => ratingJsonToMongoMap[id])
     companyObjBulk = Object.keys(companyJsonToMongoMap).map(id => companyJsonToMongoMap[id])
 
-    companySaveResults = await db(MONGO_URL, () => Company.collection.insertMany(companyObjBulk, { rawResult: true }).then(docs => docs.ops))
-    ratingSaveResults = await db(MONGO_URL, () => Rating.collection.insertMany(ratingObjBulk, { rawResult: true }).then(docs => docs.ops))
+    companySaveResults = await db(MONGO_URL, () => Company.collection.insertMany(companyObjBulk, { rawResult: true }).then(docs => docs.ops)).catch(e => { console.log(e); return [] })
+    ratingSaveResults = await db(MONGO_URL, () => Rating.collection.insertMany(ratingObjBulk, { rawResult: true }).then(docs => docs.ops)).catch(e => { console.log(e); return [] })
+
+
+
+    if (!companySaveResults || !ratingSaveResults) {
+        return false;
+    }
 
     // preparing the saved results in a map
     companySaveResults.forEach(c => {
@@ -133,7 +171,8 @@ const seed = async () => {
             upvotes: [],
             downvotes: [],
             comments: [],
-            id: ur.id
+            id: ur.id,
+            createdAt: ur.created_at
         }))
     })
 
@@ -144,15 +183,51 @@ const seed = async () => {
         console.log(companySaveResults.length, ' Company objects created.')
         console.log(ratingSaveResults.length, ' Rating objects created.')
         console.log(savedReviews.length, ' Review objects created.')
-        console.log('Exiting')
+        return true;
 
     } catch (e) {
         console.log('An error has occurred trying to save everything')
         console.log(e)
         console.log('Exiting')
+        return false;
     }
-
-
 }
 
-seed()
+
+const clear = async () => {
+    return mongoose.createConnection(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true }).dropDatabase((err, results) => {
+        if (err) {
+            console.log('Could not clear database');
+            return false;
+        }
+        console.log('Database cleared');
+        return true;
+    })
+}
+
+console.log('What would you like to do?')
+console.log('1 \tDrop database')
+console.log('2 \tSeed database')
+
+readline.question('', async ans => {
+    console.log('ans', ans)
+    var result;
+
+    if (ans == 1) {
+        console.log("Selected clear()")
+        result = await clear();
+    }
+    else if (ans == 2) {
+        console.log("Selected seed()")
+        result = await seed();
+    }
+    else {
+        console.log('No option selected')
+        result = false
+    }
+
+    result ? console.log('Successfully completed operations') : console.log('Unuccessfully completed operations')
+    console.log('Exiting.')
+    readline.close()
+    process.exit();
+})
