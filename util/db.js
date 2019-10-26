@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Promise = require('bluebird')
 mongoose.Promise = Promise;
 
-function dbExec(dbUrl, fn) {
+function exec(dbUrl, fn) {
     return mongoose.connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true })
             .then(() => fn())
             .then((res, err) => {
@@ -11,4 +11,4 @@ function dbExec(dbUrl, fn) {
             })
 }   
 
-module.exports = dbExec;
+module.exports = {exec};
