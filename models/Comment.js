@@ -8,7 +8,8 @@ const Comment = mongoose.Schema({
     upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     downvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     parentComment: { type: mongoose.Schema.Types.ObjectId, ref: "Comment" },
-    flagged: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
+    flagged: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    review: { type: mongoose.Schema.Types.ObjectId, ref: "Review", required: true }
 });
 
 module.exports = mongoose.model('Comment', Comment);
