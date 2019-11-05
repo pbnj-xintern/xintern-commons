@@ -3,7 +3,6 @@ const mongoose = require('mongoose')
 const db = require('./db')
 const User = require('../models/User')
 const Review = require('../models/Review')
-const Comment = require('../models/Comment')
 const Company = require('../models/Company')
 const Rating = require('../models/Rating')
 const { LogoScrape } = require('logo-scrape');
@@ -12,6 +11,8 @@ const readline = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
 })
+const companyImages = require('../CompanyImages.json')
+const bcrypt = require('bcryptjs')
 
 
 const getInternCompassUserId = async () => {
@@ -27,7 +28,7 @@ const getInternCompassUserId = async () => {
         lastName: 'Compass',
         role: 'XINT'
     })
-    internCompassUserId = await db(MONGO_URL, () => internCompassUser.save().then(doc => doc._id))
+    internCompassUserId = await db.exec(MONGO_URL, () => internCompassUser.save().then(doc => doc._id))
 
     return internCompassUserId
 }
@@ -73,9 +74,8 @@ const seed = async () => {
     let ratingJsonToMongoMap = {}
     let companyJsonToMongoMap = {}
     let colorIndex = 0;
-    let colors = ['FAA', 'FFC', 'CFF', 'CCF', 'FCC', 'CFC', '9CC', 'FFC', '999']
+    let colors = ['ffd700', '115173', '022c43', 'eafbea', 'f39422', '2b2b28', 'd35656', '5d1451', '484c7f']
     let blacklist = ['http://www.amd.com']
-
 
     for (var ur of rawUserReviewJson) {
 
@@ -99,8 +99,12 @@ const seed = async () => {
             ratingJsonToMongoMap[ur.id] = ratingMongoose
 
             let logoURL = company.logo_url
+            let companyNameRegex = company.name.replace(/[\W_]+/g, '').toLowerCase()
 
-            if (logoURL) {
+            if (Object.keys(companyImages).filter(cn => cn.includes(companyNameRegex)).length > 0) {
+                logoURL = companyImages[companyNameRegex]
+            }
+            else if (logoURL) {
                 let status = await axios.get(logoURL)
                     .then(response => response.status)
                     .catch(() => {
@@ -141,8 +145,8 @@ const seed = async () => {
     ratingObjBulk = Object.keys(ratingJsonToMongoMap).map(id => ratingJsonToMongoMap[id])
     companyObjBulk = Object.keys(companyJsonToMongoMap).map(id => companyJsonToMongoMap[id])
 
-    companySaveResults = await db(MONGO_URL, () => Company.collection.insertMany(companyObjBulk, { rawResult: true }).then(docs => docs.ops)).catch(e => { console.log(e); return [] })
-    ratingSaveResults = await db(MONGO_URL, () => Rating.collection.insertMany(ratingObjBulk, { rawResult: true }).then(docs => docs.ops)).catch(e => { console.log(e); return [] })
+    companySaveResults = await db.exec(MONGO_URL, () => Company.collection.insertMany(companyObjBulk, { rawResult: true }).then(docs => docs.ops)).catch(e => { console.log(e); return [] })
+    ratingSaveResults = await db.exec(MONGO_URL, () => Rating.collection.insertMany(ratingObjBulk, { rawResult: true }).then(docs => docs.ops)).catch(e => { console.log(e); return [] })
 
 
 
@@ -162,7 +166,7 @@ const seed = async () => {
 
         reviewObjBulk.push(new Review({
             _id: new mongoose.Types.ObjectId(),
-            salary: job.avg_salary_in_cents,
+            salary: ur.salary_in_cents,
             content: ur.description,
             rating: ratingJsonToMongoMap[ur.id]._id,
             position: job.title,
@@ -171,13 +175,14 @@ const seed = async () => {
             upvotes: [],
             downvotes: [],
             comments: [],
+            currency: ur.currency,
             id: ur.id,
             createdAt: ur.created_at
         }))
     })
 
     try {
-        let savedReviews = await db(MONGO_URL, () => Review.collection.insertMany(reviewObjBulk, { rawResult: true }).then(reviews => reviews.ops))
+        let savedReviews = await db.exec(MONGO_URL, () => Review.collection.insertMany(reviewObjBulk, { rawResult: true }).then(reviews => reviews.ops))
 
         console.log('Saving complete.')
         console.log(companySaveResults.length, ' Company objects created.')
@@ -205,12 +210,56 @@ const clear = async () => {
     })
 }
 
+const createTestUsers = async () => {
+    let accounts = [
+        {
+            user: 'bondtest',
+            pass: 'bondpass'
+        },
+        {
+            user: 'johntest',
+            pass: 'johnpass'
+        },
+        {
+            user: 'praiyontest',
+            pass: 'praiyonpass'
+        }
+    ]
+
+    let userPromises = []
+    userPromises = accounts.map(async info => {
+        let hash = await bcrypt.hash(info.pass, 10);
+        return new User({
+            _id: new mongoose.Types.ObjectId(),
+            createdAt: new Date(),
+            username: info.user,
+            password: hash,
+            email: 'test@test.com',
+            institution: 'University of Ottawa',
+            firstName: info.user,
+            lastName: 'xintern',
+            role: 'ADMIN'
+        })
+    })
+
+    return Promise.all(userPromises).then(insertThese => db.exec(
+        MONGO_URL,
+        () => User.collection.insertMany(insertThese, { rawResult: true }).then(docs => docs.ops)).catch(e => { console.log(e); return null }
+        )
+    ).then(userSaveResults => {
+        console.log(userSaveResults);
+        return userSaveResults !== null
+    })
+
+
+}
+
 console.log('What would you like to do?')
 console.log('1 \tDrop database')
 console.log('2 \tSeed database')
+console.log('3 \tCreate Test Users')
 
 readline.question('', async ans => {
-    console.log('ans', ans)
     var result;
 
     if (ans == 1) {
@@ -220,6 +269,10 @@ readline.question('', async ans => {
     else if (ans == 2) {
         console.log("Selected seed()")
         result = await seed();
+    }
+    else if (ans == 3) {
+        console.log("Selected createTestUsers")
+        result = await createTestUsers();
     }
     else {
         console.log('No option selected')
