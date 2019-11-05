@@ -11,9 +11,9 @@ const Review = mongoose.Schema({
     position: { type: mongoose.Schema.Types.String, required: true },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", required: true },
-    flagged: { type: mongoose.Schema.Types.Boolean, default: false },
-    upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     currency: { type: mongoose.Schema.Types.String, required: false },
+    flagged: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
+    upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     downvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }], //all children
 });
