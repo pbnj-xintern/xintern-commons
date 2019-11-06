@@ -2,7 +2,11 @@ module.exports.createErrorResponse = (code, message) => {
   console.error('sendErrorRepsonse: console logging error msg:\n', message)
   return { 
       statusCode: code, 
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: { 
+          "Content-Type": "application/json",  
+          'Access-Control-Allow-Credentials': true
+          "Access-Control-Allow-Origin": "*" 
+      },
       body: JSON.stringify({ error: message })
   }
 }
@@ -13,6 +17,7 @@ module.exports.createSuccessResponse = (code, body) => {
     headers: { 
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*"
+      'Access-Control-Allow-Credentials': true
     },
     body: JSON.stringify(body)
   }
