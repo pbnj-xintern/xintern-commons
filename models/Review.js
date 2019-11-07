@@ -5,13 +5,14 @@ const Review = mongoose.Schema({
 
     createdAt: { type: mongoose.Schema.Types.Date, default: new Date(), required: true },
 
-    salary: { type: mongoose.Schema.Types.Number, required: true },
+    salary: { type: mongoose.Schema.Types.Number, required: false },
     content: { type: mongoose.Schema.Types.String, required: true },
     rating: { type: mongoose.Schema.Types.ObjectId, ref: "Rating", required: true },
     position: { type: mongoose.Schema.Types.String, required: true },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", required: true },
-    flagged: { type: mongoose.Schema.Types.Boolean, default: false },
+    currency: { type: mongoose.Schema.Types.String, required: false },
+    flagged: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
     upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     downvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }], //all children

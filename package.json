@@ -1,6 +1,7 @@
 {
   "name": "@pbnj-xintern/xintern-commons",
-  "version": "1.0.22",
+
+  "version": "1.0.25",
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -21,5 +22,9 @@
     "jsonwebtoken": "^8.5.1",
     "logo-scrape": "^1.1.0",
     "mongoose": "^5.7.6"
+  },
+  "devDependencies": {
+    "bcryptjs": "^2.4.3",
+    "logo-scrape": "^1.1.0"
   }
 }
