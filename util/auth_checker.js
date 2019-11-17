@@ -7,3 +7,11 @@ module.exports = (token, secret) => {
         return false;
     }
 };
+
+module.exports.decodeJWT = (token) =>{
+    try{
+        return jwt.decode(token)
+    }catch(error){
+        return false;
+    }
+}
