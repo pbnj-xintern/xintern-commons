@@ -1,17 +1,24 @@
 const jwt = require('jsonwebtoken');
-
-module.exports = (token, secret) => {
-    try{
-        return jwt.verify(token, secret);
-    }catch(error){
-        return false;
-    }
+const middy = require('middy')
+module.exports.verifyJWT = (secret) => {
+    return ({
+        before: (handler, next) => {
+            let token = handler.event.headers.Authorization.replace("Bearer ", "");
+            try {
+                jwt.verify(token, secret);
+                next()
+            } catch (error) {
+                console.log(error)
+                return handler.callback();
+            }
+        }
+    })
 };
 
-module.exports.decodeJWT = (token) =>{
-    try{
+module.exports.decodeJWT = (token) => {
+    try {
         return jwt.decode(token)
-    }catch(error){
+    } catch (error) {
         return false;
     }
 }
