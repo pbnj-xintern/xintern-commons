@@ -16,6 +16,7 @@ const Review = mongoose.Schema({
     upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     downvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }], //all children
+    payPeriod: { type: mongoose.Schema.Types.String, required: false }, // MONTHLY, HOURLY, WEEKLY
 });
 
 module.exports = mongoose.model('Review', Review);
