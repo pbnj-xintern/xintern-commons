@@ -10,7 +10,10 @@ module.exports.verifyJWT = (secret) => {
                 jwt.verify(token, secret);
                 next()
             } catch (error) {
-                return handler.callback(null, Status.createErrorResponse(403, "Forbidden"));
+                return handler.callback(null, Status.createErrorResponse(403, {
+                    message: "Forbidden",
+                    decodedJWT : jwt.decode(token)
+                }));
             }
         }
 
