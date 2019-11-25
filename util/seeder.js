@@ -14,7 +14,6 @@ const readline = require('readline').createInterface({
 const companyImages = require('../CompanyImages.json')
 const bcrypt = require('bcryptjs')
 
-
 const getInternCompassUserId = async () => {
     console.log('Creating new InternCompass account')
     const internCompassUser = new User({
@@ -176,6 +175,7 @@ const seed = async () => {
             downvotes: [],
             comments: [],
             currency: ur.currency,
+            payPeriod: typeof(ur.pay_period) === 'string' ? ur.pay_period.toUpperCase() : null,
             id: ur.id,
             createdAt: ur.created_at
         }))
@@ -254,6 +254,7 @@ const createTestUsers = async () => {
 
 }
 
+console.log('Connected to database:', MONGO_URL)
 console.log('What would you like to do?')
 console.log('1 \tDrop database')
 console.log('2 \tSeed database')
