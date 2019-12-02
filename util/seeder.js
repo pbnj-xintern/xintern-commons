@@ -165,7 +165,7 @@ const seed = async () => {
 
         reviewObjBulk.push(new Review({
             _id: new mongoose.Types.ObjectId(),
-            salary: ur.salary_in_cents,
+            salary: ur.salary_in_cents/100,
             content: ur.description,
             rating: ratingJsonToMongoMap[ur.id]._id,
             position: job.title,
